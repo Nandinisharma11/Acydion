@@ -1,13 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { IngestionOrchestrator } from './engine/orchestrator.js';
 import { createApiRouter } from './routes/api.js';
 import { CONFIG } from './config.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const moduleDirectory = process.cwd();
 
 const app = express();
 const orchestrator = new IngestionOrchestrator();
@@ -19,7 +17,7 @@ app.use(express.json());
 app.use('/api', createApiRouter(orchestrator));
 
 // Serve client build if available
-const clientDistPath = path.join(__dirname, '../client/dist');
+const clientDistPath = path.join(moduleDirectory, '../client/dist');
 app.use(express.static(clientDistPath));
 
 app.get('*', (req, res, next) => {
@@ -41,13 +39,15 @@ app.get('*', (req, res, next) => {
   });
 });
 
-const PORT = CONFIG.PORT;
-app.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🚀 Acydion Ingestion Engine Server running on port ${PORT}`);
-  console.log(`📡 API & SSE Endpoint: http://localhost:${PORT}/api/telemetry/stream`);
-  console.log(`🛡️ WAF Sandbox: http://localhost:${PORT}/api/sandbox/jobs`);
-  console.log(`======================================================\n`);
-});
+if (process.env.VERCEL !== '1' && process.env.NETLIFY !== 'true') {
+  const PORT = CONFIG.PORT;
+  app.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🚀 Acydion Ingestion Engine Server running on port ${PORT}`);
+    console.log(`📡 API & SSE Endpoint: http://localhost:${PORT}/api/telemetry/stream`);
+    console.log(`🛡️ WAF Sandbox: http://localhost:${PORT}/api/sandbox/jobs`);
+    console.log(`======================================================\n`);
+  });
+}
 
 export { app, orchestrator };

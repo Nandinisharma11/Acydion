@@ -12,10 +12,17 @@
     "install-all": "npm install && npm --prefix server install && npm --prefix client install",
     "test": "node server/tests/verify-pipeline.js"
   },
-  "keywords": ["scraper", "anti-bot", "circuit-breaker", "resilience", "telemetry"],
+  "keywords": [
+    "scraper",
+    "anti-bot",
+    "circuit-breaker",
+    "resilience",
+    "telemetry"
+  ],
   "author": "Acdyon Challenge Candidate",
   "license": "MIT",
   "dependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "serverless-http": "^4.0.0"
   }
 }

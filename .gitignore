@@ -5,3 +5,7 @@ client/dist/
 !.env.example
 npm-debug.log*
 *.log
+.vercel
+
+# Local Netlify folder
+.netlify

@@ -96,7 +96,12 @@ export function App() {
   }, []);
 
   const handleStart = async (options) => {
-    await startScrape(options);
+    const result = await startScrape(options);
+    if (result?.telemetry) {
+      setTelemetry(result.telemetry);
+      setActiveProxy(result.telemetry.activeProxy);
+    }
+    if (result?.jobs) setJobs(result.jobs);
   };
 
   const handleStop = async () => {

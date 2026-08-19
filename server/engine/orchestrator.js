@@ -97,18 +97,22 @@ export class IngestionOrchestrator extends EventEmitter {
     this.log('ORCHESTRATOR', `Starting ingestion run against target [${targetKey}] with pacing [${pacingProfile}] and Stealth=[${stealthEnabled}]`, 'info');
     this.broadcastTelemetry();
 
-    // Async worker execution
-    this.runPipelineLoop({ targetKey, pacingProfile, stealthEnabled, rotateIdentities, maxBatches })
-      .catch(err => {
-        this.log('ERROR', `Pipeline crashed: ${err.message}`, 'error');
-      })
-      .finally(() => {
-        this.isRunning = false;
-        this.log('ORCHESTRATOR', `Ingestion cycle finished. Extracted ${this.extractedJobs.length} total listings.`, 'info');
-        this.broadcastTelemetry();
-      });
-
-    return { success: true, message: 'Ingestion pipeline started.' };
+    try {
+      await this.runPipelineLoop({ targetKey, pacingProfile, stealthEnabled, rotateIdentities, maxBatches });
+      return {
+        success: true,
+        message: 'Ingestion pipeline completed.',
+        telemetry: this.getFullTelemetry(),
+        jobs: this.extractedJobs
+      };
+    } catch (err) {
+      this.log('ERROR', `Pipeline crashed: ${err.message}`, 'error');
+      return { success: false, message: `Pipeline crashed: ${err.message}` };
+    } finally {
+      this.isRunning = false;
+      this.log('ORCHESTRATOR', `Ingestion cycle finished. Extracted ${this.extractedJobs.length} total listings.`, 'info');
+      this.broadcastTelemetry();
+    }
   }
 
   stopIngestion() {
